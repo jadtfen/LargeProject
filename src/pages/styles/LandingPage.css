@@ -6,7 +6,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: #313338; /* Grey background */
+  background: url('./styles/landingpage.css') no-repeat center center/cover;
 }
 
 .landing-header {
