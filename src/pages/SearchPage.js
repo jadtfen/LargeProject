@@ -12,7 +12,7 @@ const SearchPage = () => {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/displayMovies', {
+        const response = await fetch('https://localhost:5001/api/displayMovies', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ const SearchPage = () => {
       setShowingAllMovies(true);
     } else {
       try {
-        const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/searchMovie', {
+        const response = await fetch('https://localhost:5001/api/searchMovie', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

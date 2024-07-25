@@ -10,7 +10,7 @@ const VotePage = () => {
     const fetchMovies = async () => {
       try {
         const response = await fetch(
-          'https://lighthearted-moxie-82edfd.netlify.app/api/poll/votePage',
+          'https://localhost:5001/api/poll/votePage',
           {
             method: 'GET',
             credentials: 'include',
@@ -39,7 +39,7 @@ const VotePage = () => {
   const handleUpvote = async (movieId) => {
     try {
       const response = await fetch(
-        'https://lighthearted-moxie-82edfd.netlify.app/api/poll/upvoteMovie',
+        'https://localhost:5001/api/poll/upvoteMovie',
         {
           method: 'POST',
           headers: {

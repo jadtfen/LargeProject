@@ -29,7 +29,7 @@ const ChangePasswordPage = () => {
     try {
       console.log('User ID:', userId); // Debugging line
 
-      const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/changePassword', {
+      const response = await fetch('https://localhost:5001/api/changePassword', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -67,7 +67,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://lighthearted-moxie-82edfd.netlify.app/",
+  "proxy": "http://localhost:5001",
   "homepage": "/",
   "engines": {
     "node": "20.x",

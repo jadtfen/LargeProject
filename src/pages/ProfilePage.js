@@ -65,7 +65,7 @@ const ProfilePage = () => {
   const confirmLeaveGroup = async (confirmed) => {
     if (confirmed && partyID) {
       try {
-        const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/leaveParty', {
+        const response = await fetch('https:localhost:5001/api/leaveParty', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

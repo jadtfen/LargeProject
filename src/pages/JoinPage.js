@@ -50,7 +50,7 @@ const JoinPage = () => {
           setMessage(`Successfully joined the party! Party ID: ${result.partyID}`);
           
           // Create poll after joining the party
-          const pollResponse = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/poll/startPoll', {
+          const pollResponse = await fetch('https://localhost:5001/api/poll/startPoll', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
