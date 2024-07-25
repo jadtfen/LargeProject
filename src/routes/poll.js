@@ -1,49 +1,50 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const Poll = require('../models/Poll');
+const Party = require('../models/Party');
 const Movie = require('../models/Movie');
+const PartyMembers = require('../models/PartyMembers');
+const StoredMovies = require('../models/StoredMovies');
 const router = express.Router();
 
 // Vote Page using query parameter
 // Example: http://localhost:5000/api/poll/votePage?pollID=66980dc3b03ee5fdec99ffde
 router.get('/votePage', async (req, res) => {
-  const { pollID } = req.query;
-  console.log(`Fetching vote page for pollID: ${pollID}`);
+  const userID = req.session.userId;
+
+  if (!userID) {
+    return res.status(401).json({ message: 'userID not found in session' });
+  }
 
   try {
-    const pollObjectId = mongoose.Types.ObjectId(pollID);
-
-    const poll = await Poll.findById(pollObjectId);
-    if (!poll) {
-      console.log('Poll not found');
-      return res.status(404).json({ error: 'Poll not found' });
+    const partyMember = await PartyMembers.findOne({ userID }).populate(
+      'partyID'
+    );
+    if (!partyMember) {
+      return res.status(404).json({ message: 'Party not found for user' });
     }
 
-    console.log('Poll found:', poll);
-    console.log('Movies:', poll.movies);
+    const partyID = partyMember.partyID._id;
 
-    const moviesWithDetails = await Promise.all(
-      poll.movies.map(async (movieEntry) => {
-        const movie = await Movie.findOne({ movieID: movieEntry.movieID });
-        if (!movie) {
-          console.log('Movie not found for movieID:', movieEntry.movieID);
-          return null;
-        }
-
-        const { votes, watchedStatus } = movieEntry;
-        return {
-          movieName: movie.title,
-          votes,
-          watchedStatus,
-          genre: movie.genre,
-          description: movie.description,
-        };
-      })
+    const storedMovies = await StoredMovies.find({ partyID }).populate(
+      'movieID'
     );
+    if (!storedMovies || storedMovies.length === 0) {
+      return res
+        .status(404)
+        .json({ error: 'No stored movies found for this party' });
+    }
 
-    const validMovies = moviesWithDetails.filter((movie) => movie !== null);
+    const moviesWithDetails = storedMovies.map((movieEntry) => ({
+      _id: movieEntry.movieID._id,
+      title: movieEntry.movieID.title,
+      votes: movieEntry.votes,
+      watchedStatus: movieEntry.watchedStatus,
+      genre: movieEntry.movieID.genre,
+      description: movieEntry.movieID.description,
+    }));
 
-    res.status(200).json({ movies: validMovies });
+    res.status(200).json({ movies: moviesWithDetails });
   } catch (err) {
     console.error('Error fetching vote page:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -55,47 +56,75 @@ router.get('/votePage', async (req, res) => {
 //     "partyID": "66980dc3b03ee5fdec99ffdc",
 //     "movieID": 3
 // }
-// Example of validation for /addMovieToPoll
+
 router.post('/addMovieToPoll', async (req, res) => {
-  const { partyID, movieID } = req.body;
-  if (!mongoose.Types.ObjectId.isValid(partyID) || !movieID) {
-    return res.status(400).json({ error: 'Invalid input' });
+  const { movieID } = req.body;
+  const userID = req.session.userId;
+  if (!userID) {
+    return res.status(401).json({ message: 'Unauthorized' });
   }
-  
+
   try {
-    const formattedMovieID = String(movieID).trim();
-    const movie = await Movie.findOne({ movieID: formattedMovieID });
+    const party = await Party.findOne({ hostID: userID });
+
+    if (!party) {
+      console.log('Party not found for userID:', userID);
+      return res.status(404).json({ error: 'Party not found for this user' });
+    }
+
+    const partyID = party._id;
+
+    if (!mongoose.Types.ObjectId.isValid(partyID)) {
+      console.log('Invalid party ID:', partyID);
+      return res.status(400).json({ error: 'Invalid party ID' });
+    }
+
+    if (typeof movieID !== 'number') {
+      console.log('Invalid movie ID type:', movieID);
+      return res.status(400).json({ error: 'Invalid movie ID' });
+    }
+
+    const movie = await Movie.findOne({ movieID: movieID });
     if (!movie) {
+      console.log('Movie not found for movieID:', movieID);
       return res.status(404).json({ error: 'Movie not found' });
     }
 
-    const poll = await Poll.findOne({ partyID: mongoose.Types.ObjectId(partyID) });
-    if (!poll) {
-      return res.status(404).json({ error: 'Poll not found' });
+    const existingStoredMovie = await StoredMovies.findOne({
+      movieID: movie._id,
+      partyID: partyID,
+    });
+    if (existingStoredMovie) {
+      console.log('Movie already in storedMovies:', movieID);
+      return res.status(400).json({ error: 'Movie already in storedMovies' });
     }
 
-    const movieExists = poll.movies.some(m => m.movieID === formattedMovieID);
-    if (movieExists) {
-      return res.status(400).json({ error: 'Movie already in poll' });
-    }
+    const storedMovie = new StoredMovies({
+      userID: userID,
+      movieID: movie._id,
+      partyID: partyID,
+      votes: 0,
+      watchedStatus: false,
+    });
 
-    poll.movies.push({ movieID: formattedMovieID, votes: 0, watchedStatus: false });
-    await poll.save();
+    await storedMovie.save();
 
-    res.status(201).json({ message: 'Movie added to poll successfully', poll });
+    res.status(201).json({
+      message: 'Movie added to storedMovies successfully',
+      storedMovie,
+    });
   } catch (e) {
-    console.error('Error adding movie to poll:', e);
+    console.error('Error adding movie to storedMovies:', e);
     res.status(500).json({ error: e.toString() });
   }
 });
-
-
 
 // Upvote movie
 // Example: {
 //     "partyID": "66980dc3b03ee5fdec99ffdc",
 //     "movieID": 3
 // }
+
 router.post('/upvoteMovie', async (req, res) => {
   const { partyID, movieID } = req.body;
   console.log(`Upvoting movie for partyID: ${partyID}, movieID: ${movieID}`);
@@ -130,6 +159,7 @@ router.post('/upvoteMovie', async (req, res) => {
 //     "partyID": "66980dc3b03ee5fdec99ffdc",
 //     "movieID": 3
 // }
+
 router.delete('/removeMovie', async (req, res) => {
   const { partyID, movieID } = req.body;
   console.log(
@@ -163,51 +193,12 @@ router.delete('/removeMovie', async (req, res) => {
   }
 });
 
-router.get('/upvotedMovies', async (req, res) => {
-  try {
-    const polls = await Poll.find({ 'movies.votes': { $gt: 0 } });
-
-    let upvotedMovies = [];
-    for (const poll of polls) {
-      for (const movieEntry of poll.movies) {
-        if (movieEntry.votes > 0) {
-          const movie = await Movie.findOne({ movieID: movieEntry.movieID });
-          if (movie) {
-            upvotedMovies.push({
-              title: movie.title,
-              votes: movieEntry.votes,
-              genre: movie.genre,
-              description: movie.description,
-            });
-          }
-        }
-      }
-    }
-
-    res.status(200).json({ movies: upvotedMovies });
-  } catch (err) {
-    console.error('Error fetching upvoted movies:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Mark movie as watched
 // Example: {
 //     "partyID": "66980dc3b03ee5fdec99ffdc",
 //     "movieID": 3
 // }
+
 router.post('/markWatched', async (req, res) => {
   const { movieID, partyID } = req.body;
   console.log(
@@ -241,11 +232,11 @@ router.post('/markWatched', async (req, res) => {
 
 // Start poll
 router.post('/startPoll', async (req, res) => {
-  const { partyID } = req.body;
-  console.log(`Starting poll for partyID: ${partyID}`);
+  const { partyID, movieID } = req.body;
+  console.log(`Starting poll for partyID: ${partyID}, movieID: ${movieID}`);
 
   try {
-    const newPoll = new Poll({ partyID });
+    const newPoll = new Poll({ partyID, movieID });
     await newPoll.save();
     res.status(201).json({
       pollID: newPoll._id,
@@ -254,12 +245,8 @@ router.post('/startPoll', async (req, res) => {
     });
   } catch (e) {
     console.error('Error starting poll:', e);
-    res.status(500).json({
-      error: e.message || 'An error occurred while creating the poll',
-    });
+    res.status(500).json({ error: e.toString() });
   }
 });
-
-
 
 module.exports = router;
