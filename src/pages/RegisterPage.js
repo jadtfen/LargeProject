@@ -17,9 +17,9 @@ function RegisterPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: registerEmail,
-          name: registerName,
-          password: registerPassword
+          email: email,
+          name: name,
+          password: password
         })
       });
 
