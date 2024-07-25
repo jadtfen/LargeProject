@@ -13,7 +13,7 @@ function RegisterPage() {
     event.preventDefault(); 
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', { // Adjust URL if needed
+      const response = await fetch('https://66a1c8de65ce06988ddcbc0c--group5cop4331.netlify.app/api/auth/register', { // Adjust URL if needed
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
