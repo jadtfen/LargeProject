@@ -1,26 +1,21 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-// Define the Poll Schema
-const pollSchema = new Schema({
+const pollSchema = new mongoose.Schema({
+  pollID: { type: Number, required: true, unique: true },
   partyID: {
-    type: Schema.Types.ObjectId,  // Ensure this matches the Party _id type
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Party',
     required: true,
   },
-  movies: [
-    {
-      movieID: {
-        type: Schema.Types.ObjectId,  // Use ObjectId if referencing Movie schema
-        ref: 'Movie',
-        required: true,
-      },
-      votes: { type: Number, default: 0 },
-      watchedStatus: { type: Boolean, default: false },
-    },
-  ],
+  movieID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Movie',
+    required: false,
+  },
+  votes: { type: Number, default: 0 },
+  watchedStatus: { type: Boolean, default: false },
 });
 
-const Poll = mongoose.model('Poll', pollSchema);
+const Poll = mongoose.model('Poll', pollSchema, 'poll');
 
 module.exports = Poll;
