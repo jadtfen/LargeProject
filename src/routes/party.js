@@ -6,14 +6,18 @@ const PartyMembers = require('../models/PartyMembers');
 const Poll = require('../models/Poll');
 const mongoose = require('mongoose');
 const Movie = require('../models/Movie');
+const authenticate = require('../middleware/authenticate');
 const { ObjectId } = require('mongodb');
+
 const MongoClient = require('mongodb').MongoClient;
-const url = 'mongodb+srv://lyrenee02:tSGwv9viMBFajw3u@cluster.muwwbsd.mongodb.net/party-database?retryWrites=true&w=majority&appName=cluster';
+const url =
+  'mongodb+srv://lyrenee02:tSGwv9viMBFajw3u@cluster.muwwbsd.mongodb.net/party-database?retryWrites=true&w=majority&appName=cluster';
 const client = new MongoClient(url);
 
-// Helper function to generate a unique party code
+// Generates unique party invite code when creating new party
 const generateUniquePartyCode = async () => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let code;
   let isUnique = false;
 
@@ -31,7 +35,7 @@ const generateUniquePartyCode = async () => {
   return code;
 };
 
-// Route to edit party name
+// Edit Party Name
 router.post('/EditPartyName', async (req, res) => {
   const { newPartyName, hostID } = req.body;
 
@@ -56,56 +60,81 @@ router.post('/EditPartyName', async (req, res) => {
   }
 });
 
-// Route to create a party and poll
+// Create party
 router.post('/create', async (req, res) => {
-  const { partyName, userId } = req.body;
+  const { partyName } = req.body;
+  const userID = req.session.userId;
 
-  if (!userId) {
-    return res.status(401).json({ message: 'User ID not provided' });
+  if (!userID) {
+    return res.status(401).json({ message: 'userID not found' });
   }
 
+  console.log(partyName);
+
   try {
-    // Check if the user already has a party
-    const existingParty = await Party.findOne({ hostID: userId });
+    const existingParty = await Party.findOne({ hostID: userID });
 
     if (existingParty) {
-      return res.status(200).json({
-        message: 'User already has a party',
-        partyInviteCode: existingParty.partyInviteCode,
-        partyID: existingParty._id,
-      });
+      return res.status(400).json({ message: 'User already has a party' });
     }
 
-    // Generate a unique party code
     const partyInviteCode = await generateUniquePartyCode();
 
-    // Create a new party with the provided name and generated invite code
     const newParty = new Party({
       partyName,
-      hostID: userId, // Ensure your schema still supports this field
+      hostID: userID,
       partyInviteCode,
     });
 
     const savedParty = await newParty.save();
 
+    const newPoll = new Poll({
+      pollID: Date.now(),
+      partyID: savedParty._id,
+      movieID: null,
+      votes: 0,
+      watchedStatus: false,
+    });
+
+    const savedPoll = await newPoll.save();
+
+    const newMember = new PartyMembers({
+      userID: userID,
+      partyID: savedParty._id,
+    });
+
+    await newMember.save();
+
     res.status(201).json({
-      message: 'Party created successfully',
-      partyInviteCode: savedParty.partyInviteCode,
+      message: 'Party, Poll, and Membership created successfully',
+      party: savedParty,
+      poll: savedPoll,
     });
   } catch (err) {
-    console.error('Error creating party:', err);
+    console.error('Error creating party, poll, and membership:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
-
-
-// Route to get home page details
 router.get('/home', async (req, res) => {
-  const { partyID } = req.query;
-  console.log(`Fetching home page for partyID: ${partyID}`);
+  const userID = req.session.userId;
+
+  if (!userID) {
+    return res.status(401).json({ message: 'userID not found in session' });
+  }
 
   try {
+    const partyMember = await PartyMembers.findOne({ userID }).populate(
+      'partyID'
+    );
+    if (!partyMember) {
+      return res.status(404).json({ message: 'Party not found for user' });
+    }
+
+    const partyID = partyMember.partyID._id;
+
+    console.log(`Fetching home page for partyID: ${partyID}`);
+
     const party = await Party.findById(partyID).populate('hostID');
     if (!party) {
       console.log('Party not found');
@@ -114,12 +143,12 @@ router.get('/home', async (req, res) => {
 
     console.log('Party found:', party);
 
-    const guests = await PartyMembers.find({ partyID }).populate('userI');
+    const guests = await PartyMembers.find({ partyID }).populate('userID');
     console.log('Guests found:', guests);
 
     const guestDetails = guests.map((guest) => ({
-      userName: guest.userId.name,
-      userEmail: guest.userId.email,
+      userName: guest.userID.username,
+      userEmail: guest.userID.email,
     }));
     console.log('Guest details:', guestDetails);
 
@@ -128,8 +157,18 @@ router.get('/home', async (req, res) => {
 
     const moviesWithDetails = await Promise.all(
       polls.map(async (poll) => {
+        if (!poll.movies || poll.movies.length === 0) return [];
         return await Promise.all(
           poll.movies.map(async (movieEntry) => {
+            if (!movieEntry.movieID) {
+              return {
+                movieName: 'No movie assigned',
+                votes: movieEntry.votes,
+                watchedStatus: movieEntry.watchedStatus,
+                genre: null,
+                description: null,
+              };
+            }
             const movie = await Movie.findOne({ movieID: movieEntry.movieID });
             if (!movie) {
               console.log('Movie not found for movieID:', movieEntry.movieID);
@@ -165,56 +204,48 @@ router.get('/home', async (req, res) => {
   }
 });
 
-// Route to join a party
-router.post('/joinParty', async (req, res) => {
-  const { partyInviteCode, userId } = req.body;
-  const db = client.db('party-database');
+//Leave Party
+router.post('/leaveParty', async (req, res) => {
+  const userID = req.session.userId;
 
-  if (!userId) {
-    return res.status(400).json({ message: 'User ID is required' });
+  if (!userID) {
+    return res.status(401).json({ message: 'userID not found' });
   }
 
   try {
-    const party = await Party.findOne({ partyInviteCode });
-    if (!party) {
-      console.log('Invalid party invite code');
-      return res.status(400).json({ error: 'Invalid code' });
+    console.log(`Attempting to remove user ${userID} from their party`);
+
+    const userObjectId = new ObjectId(userID);
+
+    const partyMember = await PartyMembers.findOne({ userID: userObjectId });
+    if (!partyMember) {
+      console.log('User is not in any party');
+      return res.status(400).json({ message: 'User is not in any party' });
     }
 
-    const userObjectId = new ObjectId(userId);
-    const partyObjectId = new ObjectId(party._id);
+    const partyObjectId = partyMember.partyID;
 
-    const existingMember = await db
-      .collection('PartyMembers')
-      .findOne({ userI: userObjectId, partyID: partyObjectId });
-    if (existingMember) {
-      console.log('User is already a member of the party');
-      return res
-        .status(400)
-        .json({ message: 'User is already a member of the party' });
-    }
+    const currentMembers = await PartyMembers.find({ partyID: partyObjectId });
+    console.log('Current party members:', currentMembers);
 
-    const newMember = {
-      userId: userObjectId,
+    const deleteResult = await PartyMembers.deleteOne({
+      userID: userObjectId,
       partyID: partyObjectId,
-    };
-
-    const insertResult = await db
-      .collection('PartyMembers')
-      .insertOne(newMember);
-    console.log('Insert result:', insertResult);
-
-    const updateResult = await db
-      .collection('users')
-      .updateOne({ _id: userObjectId }, { $set: { status: 1 } });
-
-    res.status(200).json({
-      userId: userId,
-      partyID: party._id,
-      message: 'Joined party successfully',
     });
+    console.log('Delete result:', deleteResult);
+
+    const updatedMembers = await PartyMembers.find({ partyID: partyObjectId });
+    console.log('Updated party members:', updatedMembers);
+
+    const updateResult = await User.updateOne(
+      { _id: userObjectId },
+      { $set: { status: 0 } }
+    );
+    console.log('Update result:', updateResult);
+
+    res.status(200).json({ message: 'Left party successfully' });
   } catch (e) {
-    console.error('Error joining party:', e);
+    console.error('Error leaving party:', e);
     res.status(500).json({ error: e.toString() });
   }
 });
