@@ -6,7 +6,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: url('./landingpage.png') no-repeat center center/cover;
+  background: url('./landingpage.png') no-repeat center center;
+  background-size: cover; /* Ensure the image covers the entire container */
 }
 
 .landing-header {
@@ -15,6 +16,7 @@
   position: absolute; /* Make sure the header is on top of the background image */
   top: 20px; /* Adjust as needed to position the title */
   width: 100%;
+  z-index: 2; /* Ensure the header is above other content */
 }
 
 .landing-title {
@@ -30,7 +32,7 @@
   flex-direction: column;
   align-items: center;
   position: relative; /* Ensure it is positioned below the header */
-  z-index: 1; /* Make sure the buttons are above the background image */
+  z-index: 1; /* Ensure the buttons are above the background image */
 }
 
 .landing-link {
