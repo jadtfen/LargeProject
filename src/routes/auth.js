@@ -30,12 +30,14 @@ router.post('/register', async (req, res) => {
   }
 
   try {
+    const emailToken = jwt.sign({ data: 'Token Data' }, 'ourSecretKey');
     const hashedPassword = bcrypt.hashSync(password, 8);
     const newUser = new User({
       name,
       email,
       password: hashedPassword,
       status: 0,
+      emailToken: emailToken,
       emailVerifStatus: 0,
     });
     await newUser.save();
@@ -88,7 +90,7 @@ router.post('/sendEmail', async (req, res) => {
       text: `Hi! There, You have recently visited 
             our website and entered your email.
             Please follow the given link to verify your email
-            https://lighthearted-moxie-82edfd.netlify.app/verifyEmail/${emailToken} 
+            http://localhost:5000/verifyEmail/${emailToken} 
             Thanks`,
     })
     .then(() => {
@@ -128,11 +130,18 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
+    // if (user.emailVerifStatus === 0) {
+    //   return res.status(401).json({ message: 'Email not verified' });
+    // }
+
+    // Set session
     req.session.userId = user._id;
     req.session.email = user.email;
     req.session.save((err) => {
       if (err) {
-        return res.status(500).json({ message: 'Session save error', error: err });
+        return res
+          .status(500)
+          .json({ message: 'Session save error', error: err });
       }
       res.status(200).json({ message: 'Login successful', userId: user._id });
     });
