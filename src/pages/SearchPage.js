@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './styles/SearchPage.css';
 
 const SearchPage = () => {
@@ -7,9 +7,7 @@ const SearchPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [allMovies, setAllMovies] = useState([]);
   const [showingAllMovies, setShowingAllMovies] = useState(true);
-  const navigate = useNavigate();
-  const [pollID, setPollID] = useState(localStorage.getItem('pollID') || '');
-  const [partyID, setPartyID] = useState(localStorage.getItem('partyID') || '');
+  // Removed unused `navigate`, `pollID`, `setPollID`, `partyID`, `setPartyID`
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -146,25 +144,20 @@ const SearchPage = () => {
             filteredMovies.map((movie, index) => (
               <div key={index} className="movie-box">
                 <div className="movie-title">{movie.title}</div>
-                <button
-                  className="add-button"
-                  onClick={() => handleAddToPoll(movie.movieID)}
-                >
-                  Add To Poll
-                </button>
+                <button onClick={() => handleAddToPoll(movie._id)}>Add to Poll</button>
               </div>
             ))
           )}
         </div>
       </div>
       <div className="navigation-bar">
-        <div className="nav-item current-page">
+        <div className="nav-item">
           <Link to="/search">Search</Link>
         </div>
         <div className="nav-item">
           <Link to="/vote">Vote</Link>
         </div>
-        <div className="nav-item">
+        <div className="nav-item current-page">
           <Link to="/home">Home</Link>
         </div>
         <div className="nav-item">

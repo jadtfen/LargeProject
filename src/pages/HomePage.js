@@ -7,7 +7,7 @@ const HomePage = () => {
   const [groupMembers, setGroupMembers] = useState([]);
   const [error, setError] = useState(null);
   const [partyName, setPartyName] = useState('');
-  const [hostName, setHostName] = useState('');
+  // Removed the unused state `hostName`
   const [topVotedMovie, setTopVotedMovie] = useState('');
 
   const location = useLocation();
@@ -31,7 +31,7 @@ const HomePage = () => {
 
         const data = await response.json();
         setPartyName(data.partyName || '');
-        setHostName(data.hostName || '');
+        // Removed the setHostName call
         setTopVotedMovie(data.topVotedMovie || 'No votes yet');
         setGroupMembers(data.guests || []);
         setError(null);
