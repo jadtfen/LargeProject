@@ -9,7 +9,7 @@ function RegisterPage() {
 
   const register = async (email, name, password) => {
     try {
-      const response = await fetch('https://localhost:5001/api/auth/register', {
+      const response = await fetch('https://group5cop4331.com/login/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
