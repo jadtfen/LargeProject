@@ -16,7 +16,9 @@ html, body {
   justify-content: center;
   align-items: center;
   background: url('./landingpage.png') no-repeat center center;
-  background-size: cover; /* Ensure the image covers the entire container */
+  background-size: contain; /* Adjust image to fit within container */
+  background-repeat: no-repeat; /* Prevent repeating the image */
+  background-position: center; /* Center the image */
 }
 
 /* Header style to ensure it appears on top of the background image */
