@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Test</title>
+    <script type="module">
+      import { register, login, createParty } from './src/api.js';
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document
+          .getElementById('registerBtn')
+          .addEventListener('click', async () => {
+            const email = document.getElementById('registerEmail').value;
+            const name = document.getElementById('registerName').value;
+            const password = document.getElementById('registerPassword').value;
+            try {
+              const result = await register(email, name, password);
+              console.log('Register result:', result);
+              alert('Registration successful!'); // User feedback
+            } catch (error) {
+              console.error('Register error:', error);
+              alert('Registration failed. Please try again.'); // User feedback
+            }
+          });
+
+        document
+          .getElementById('loginBtn')
+          .addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            try {
+              const result = await login(email, password);
+              console.log('Login result:', result);
+              alert('Login successful!'); // User feedback
+            } catch (error) {
+              console.error('Login error:', error);
+              alert('Login failed. Please check your credentials.'); // User feedback
+            }
+          });
+
+        document
+          .getElementById('createPartyBtn')
+          .addEventListener('click', async () => {
+            const partyName = document.getElementById('partyName').value;
+            try {
+              const result = await createParty(partyName);
+              console.log('Create party result:', result);
+              alert('Party created successfully!'); // User feedback
+            } catch (error) {
+              console.error('Create party error:', error);
+              alert('Failed to create party. Please try again.'); // User feedback
+            }
+          });
+      });
+    </script>
+  </head>
+  <body>
+    <h1>API Test</h1>
+    <h2>Register</h2>
+    <input type="text" id="registerEmail" placeholder="Email" />
+    <input type="text" id="registerName" placeholder="Name" />
+    <input type="password" id="registerPassword" placeholder="Password" />
+    <button id="registerBtn">Register</button>
+
+    <h2>Login</h2>
+    <input type="text" id="loginEmail" placeholder="Email" />
+    <input type="password" id="loginPassword" placeholder="Password" />
+    <button id="loginBtn">Login</button>
+
+    <h2>Create Party</h2>
+    <input type="text" id="partyName" placeholder="Party Name" />
+    <button id="createPartyBtn">Create Party</button>
+  </body>
+</html>
