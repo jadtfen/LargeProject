@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './styles/Register.css';
 
 function RegisterPage() {
@@ -40,8 +40,6 @@ function RegisterPage() {
       setMessage('Registration failed');
     }
   };
-
-  // Remove fetchUserAccount and fetchToken functions if not used
 
   return (
     <div className="container">
