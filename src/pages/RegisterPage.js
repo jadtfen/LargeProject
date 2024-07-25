@@ -10,7 +10,7 @@ function RegisterPage() {
 
   const register = async (email, name, password) => {
     try {
-      const response = await fetch('https://66a1c8de65ce06988ddcbc0c--group5cop4331.netlify.app/api/auth/register', {
+      const response = await fetch('https://localhost:5001/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -26,8 +26,7 @@ function RegisterPage() {
         console.log('Registration successful');
         setMessage('Registration successful');
         localStorage.setItem('token', data.token); // Store the token in localStorage
-        // Redirect to the join page or login page
-        window.location.href = '/join'; // Example: Redirect to '/join' page
+        window.location.href = '/join'; 
       } else if (response.status === 400) {
         console.log('Registration failed: Bad Request');
         console.log('Registration error:', data.error);

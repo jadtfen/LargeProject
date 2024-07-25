@@ -21,7 +21,7 @@ const ProfilePage = () => {
     } else {
       const fetchUserDetails = async () => {
         try {
-          const userResponse = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/userAccount', {
+          const userResponse = await fetch('https://localhost:5001/api/userAccount', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

@@ -11,7 +11,7 @@ function LoginPage() {
   const doLogin = async (email, password) => {
     console.log('Logging in with:', email, password); 
     try {
-      const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/auth/login', {
+      const response = await fetch('https://localhost:5001/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
