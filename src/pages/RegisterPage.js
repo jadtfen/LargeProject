@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link
+import { useNavigate, Link } from 'react-router-dom';
 import './styles/Register.css';
 
 function RegisterPage() {
-  const [registerUsername, setRegisterUsername] = useState('');
+  const [registerName, setRegisterName] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -13,12 +13,12 @@ function RegisterPage() {
     event.preventDefault(); 
 
     try {
-      const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/auth/register', {
+      const response = await fetch('http://localhost:5000/api/auth/register', { // Adjust URL if needed
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: registerUsername,
           email: registerEmail,
+          name: registerName,
           password: registerPassword
         })
       });
@@ -42,8 +42,8 @@ function RegisterPage() {
         setMessage('Registration successful! Redirecting to login...');
         setTimeout(() => navigate('/login'), 2000); // Redirect after a short delay
       } else {
-        console.error('Registration error:', data.error);
-        setMessage(data.error || 'Registration failed. Please try again.'); // Display error message
+        console.error('Registration error:', data.message);
+        setMessage(data.message || 'Registration failed. Please try again.'); // Display error message
       }
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -58,10 +58,10 @@ function RegisterPage() {
         <form onSubmit={handleRegister}>
           <input
             type="text"
-            id="registerUsername"
-            placeholder="Username"
-            value={registerUsername}
-            onChange={(e) => setRegisterUsername(e.target.value)}
+            id="registerName"
+            placeholder="Name"
+            value={registerName}
+            onChange={(e) => setRegisterName(e.target.value)}
             required
           /><br />
           <input
