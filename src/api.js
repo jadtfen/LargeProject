@@ -1,4 +1,4 @@
-const API_URL = 'https://lighthearted-moxie-82edfd.netlify.app/api';
+const API_URL = 'http://localhost:5000/api';
 
 const handleResponse = async (response) => {
   if (!response.ok) {
@@ -8,7 +8,7 @@ const handleResponse = async (response) => {
   return response.json();
 };
 
-// Used to register new users. POST request that expects an email, name, and password
+// Used to register new users. POST request that expects an email, name and password
 export const register = async (email, name, password) => {
   const response = await fetch(`${API_URL}/auth/register`, {
     method: 'POST',
@@ -20,35 +20,62 @@ export const register = async (email, name, password) => {
   return handleResponse(response);
 };
 
-// Used to login new users. POST request that expects an email and password.
-// The generated token is stored for the specific user for later use that requires stricter authentication.
+// Used to login new users. POST request that expects an email, and password.
+// The generate token is stored for the specific user for later use that requires stricter authentication.
 export const login = async (email, password) => {
   console.log('Sending login request', { email, password });
-  const response = await fetch(`${API_URL}/auth/login`, {
+  const response = await fetch('http://localhost:5000/api/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ email, password }),
-    credentials: 'include', // Include credentials in the request
+    credentials: 'include',
   });
+
   return handleResponse(response);
 };
 
+// This function will return the specific token for the current user that is currently logged in.
+const getToken = async () => {
+  const token = localStorage.getItem('token');
+  const tokenExpiry = localStorage.getItem('tokenExpiry');
+
+  if (!token || Date.now() > tokenExpiry) {
+    try {
+      const newToken = await refreshToken();
+      return newToken;
+    } catch (error) {
+      throw new Error('Session expired. Please log in again.');
+    }
+  }
+
+  return token;
+};
+
+// Party functions
+
+// createParty
+// joinParty
+// GetPartyHomePage
+// EditPartyName
+
 // Creates a party. POST request that requires a party name. Token is required from the user (they have to be logged in) in order to create a party.
+// getToken() function is used to retrieve the current users token.
 export const createParty = async (partyName) => {
-  const response = await fetch(`${API_URL}/party/create`, {
+  const response = await fetch('http://localhost:5000/api/party/create', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ partyName }),
-    credentials: 'include', // Include credentials in the request
+    credentials: 'include',
   });
+
   return handleResponse(response);
 };
 
-// Allows a user to join a party. POST request that expects the party invite code and user ID.
+// Allows user to join a party. POST request that expects the party invite code that is created when the party is created by host.
 export const joinParty = async (partyInviteCode, userID) => {
   const response = await fetch(`${API_URL}/party/joinParty`, {
     method: 'POST',
@@ -56,24 +83,22 @@ export const joinParty = async (partyInviteCode, userID) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ partyInviteCode, userID }),
-    credentials: 'include', // Include credentials in the request
   });
+
   return handleResponse(response);
 };
 
 // Gets the homepage of the party. GET request that expects the partyID as a query parameter.
+// Example: http://localhost:5000/api/party/home/?partyID=66934da66fca26f472155a9d
 export const getPartyHomePage = async (partyID) => {
   const response = await fetch(`${API_URL}/party/home?partyID=${partyID}`, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include', // Include credentials in the request
+    headers: {},
   });
+
   return handleResponse(response);
 };
 
-// Edits the party name. POST request that requires the new party name and host ID.
 export const editPartyName = async (newPartyName, hostID) => {
   const response = await fetch(`${API_URL}/party/EditPartyName`, {
     method: 'POST',
@@ -81,12 +106,11 @@ export const editPartyName = async (newPartyName, hostID) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ newPartyName, hostID }),
-    credentials: 'include', // Include credentials in the request
   });
+
   return handleResponse(response);
 };
 
-// Allows a user to leave a party. POST request that expects the user ID and party ID.
 export const leaveParty = async (userID, partyID) => {
   const response = await fetch(`${API_URL}/party/leaveParty`, {
     method: 'POST',
@@ -94,24 +118,27 @@ export const leaveParty = async (userID, partyID) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ userID, partyID }),
-    credentials: 'include', // Include credentials in the request
   });
+
   return handleResponse(response);
 };
 
-// Gets the vote page for a specific poll ID. GET request that expects the pollID as a query parameter.
+// Example: http://localhost:5000/api/poll/votePage?pollID=66980dc3b03ee5fdec99ffde
 export const getVotePage = async (pollID) => {
   const response = await fetch(`${API_URL}/poll/votePage?pollID=${pollID}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: 'include', // Include credentials in the request
   });
+
   return handleResponse(response);
 };
 
-// Adds a movie to a poll. POST request that requires partyID and movieID.
+// Example: {
+//     "partyID": "66980dc3b03ee5fdec99ffdc",
+//     "movieID": 3
+// }
 export const addMovieToPoll = async (partyID, movieID) => {
   const response = await fetch(`${API_URL}/poll/addMovieToPoll`, {
     method: 'POST',
@@ -119,12 +146,15 @@ export const addMovieToPoll = async (partyID, movieID) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ partyID, movieID }),
-    credentials: 'include', // Include credentials in the request
   });
+
   return handleResponse(response);
 };
 
-// Upvotes a movie in a poll. POST request that requires partyID and movieID.
+// Example: {
+//     "partyID": "66980dc3b03ee5fdec99ffdc",
+//     "movieID": 3
+// }
 export const upvoteMovie = async (partyID, movieID) => {
   const response = await fetch(`${API_URL}/poll/upvoteMovie`, {
     method: 'POST',
@@ -132,12 +162,15 @@ export const upvoteMovie = async (partyID, movieID) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ partyID, movieID }),
-    credentials: 'include', // Include credentials in the request
   });
+
   return handleResponse(response);
 };
 
-// Removes a movie from a poll. DELETE request that requires partyID and movieID.
+// Example: {
+//     "partyID": "66980dc3b03ee5fdec99ffdc",
+//     "movieID": 3
+// }
 export const removeMovieFromPoll = async (partyID, movieID) => {
   const response = await fetch(`${API_URL}/poll/removeMovie`, {
     method: 'DELETE',
@@ -145,12 +178,15 @@ export const removeMovieFromPoll = async (partyID, movieID) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ partyID, movieID }),
-    credentials: 'include', // Include credentials in the request
   });
+
   return handleResponse(response);
 };
 
-// Marks a movie as watched in a poll. POST request that requires partyID and movieID.
+// Example: {
+//     "partyID": "66980dc3b03ee5fdec99ffdc",
+//     "movieID": 3
+// }
 export const markMovieAsWatched = async (partyID, movieID) => {
   const response = await fetch(`${API_URL}/poll/markWatched`, {
     method: 'POST',
@@ -158,7 +194,7 @@ export const markMovieAsWatched = async (partyID, movieID) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ partyID, movieID }),
-    credentials: 'include', // Include credentials in the request
   });
+
   return handleResponse(response);
 };
