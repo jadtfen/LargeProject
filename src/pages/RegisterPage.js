@@ -6,7 +6,6 @@ function RegisterPage() {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [token, setToken] = useState('');
 
   const register = async (email, name, password) => {
     try {
@@ -42,44 +41,7 @@ function RegisterPage() {
     }
   };
 
-  const fetchUserAccount = async (token) => {
-    try {
-      const response = await fetch('http://localhost:5002/api/auth/user', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('User account data:', data);
-        // Handle user account data
-      } else {
-        throw new Error('Failed to fetch user account');
-      }
-    } catch (error) {
-      console.error('Error fetching user account:', error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        const response = await fetch('http://localhost:5002/api/auth/token');
-        if (response.ok) {
-          const data = await response.json();
-          setToken(data.token);
-          fetchUserAccount(data.token);
-        } else {
-          throw new Error('Failed to fetch token');
-        }
-      } catch (error) {
-        console.error('Error fetching token:', error);
-      }
-    };
-
-    fetchToken();
-  }, []);
+  // Remove fetchUserAccount and fetchToken functions if not used
 
   return (
     <div className="container">
