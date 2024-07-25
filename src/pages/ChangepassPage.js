@@ -29,7 +29,7 @@ const ChangePasswordPage = () => {
     try {
       console.log('User ID:', userId); // Debugging line
 
-      const response = await fetch('https://themoviesocial-a63e6cbb1f61.herokuapp.com/api/changePassword', {
+      const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/changePassword', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -21,7 +21,7 @@ const ProfilePage = () => {
     } else {
       const fetchUserDetails = async () => {
         try {
-          const userResponse = await fetch('https://themoviesocial-a63e6cbb1f61.herokuapp.com/api/userAccount', {
+          const userResponse = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/userAccount', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const ProfilePage = () => {
   const confirmLeaveGroup = async (confirmed) => {
     if (confirmed && partyID) {
       try {
-        const response = await fetch('https://themoviesocial-a63e6cbb1f61.herokuapp.com/api/leaveParty', {
+        const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/leaveParty', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

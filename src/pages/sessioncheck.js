@@ -7,7 +7,7 @@ const CheckSession = () => {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const response = await fetch('https://themoviesocial-a63e6cbb1f61.herokuapp.com/api/check-session', {
+        const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/check-session', {
           method: 'GET',
           credentials: 'include',
         });

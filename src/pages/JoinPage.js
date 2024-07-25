@@ -32,7 +32,7 @@ const JoinPage = () => {
   const handleJoinParty = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch('https://themoviesocial-a63e6cbb1f61.herokuapp.com/api/party/joinParty', {
+      const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/party/joinParty', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ const JoinPage = () => {
           setMessage(`Successfully joined the party! Party ID: ${result.partyID}`);
           
           // Create poll after joining the party
-          const pollResponse = await fetch('https://themoviesocial-a63e6cbb1f61.herokuapp.com/api/poll/startPoll', {
+          const pollResponse = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/poll/startPoll', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

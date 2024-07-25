@@ -31,7 +31,7 @@ mongoose
 // Middleware
 app.use(
   cors({
-    origin: 'https://themoviesocial-a63e6cbb1f61.herokuapp.com',
+    origin: 'https://lighthearted-moxie-82edfd.netlify.app',
     credentials: true,
   })
 );

@@ -1,4 +1,4 @@
-const API_URL = 'https://themoviesocial-a63e6cbb1f61.herokuapp.com/api';
+const API_URL = 'https://lighthearted-moxie-82edfd.netlify.app/api';
 
 const handleResponse = async (response) => {
   if (!response.ok) {

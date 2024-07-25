@@ -13,7 +13,7 @@ function RegisterPage() {
     event.preventDefault(); 
 
     try {
-      const response = await fetch('https://themoviesocial-a63e6cbb1f61.herokuapp.com/api/auth/register', {
+      const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

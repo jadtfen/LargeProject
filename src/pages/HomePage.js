@@ -18,7 +18,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchGroupData = async () => {
       try {
-        const response = await fetch(`https://themoviesocial-a63e6cbb1f61.herokuapp.com/home?partyID=${partyID}&userID=${userID}`, {
+        const response = await fetch(`https://lighthearted-moxie-82edfd.netlify.app/home?partyID=${partyID}&userID=${userID}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

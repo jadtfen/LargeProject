@@ -68,7 +68,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://themoviesocial-a63e6cbb1f61.herokuapp.com/",
+  "proxy": "https://lighthearted-moxie-82edfd.netlify.app/",
   "homepage": "/",
   "engines": {
     "node": "20.x",

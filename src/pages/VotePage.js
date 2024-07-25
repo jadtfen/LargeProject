@@ -10,7 +10,7 @@ const VotePage = () => {
     const fetchMovies = async () => {
       try {
         const response = await fetch(
-          'https://themoviesocial-a63e6cbb1f61.herokuapp.com/api/poll/votePage',
+          'https://lighthearted-moxie-82edfd.netlify.app/api/poll/votePage',
           {
             method: 'GET',
             credentials: 'include',
@@ -39,7 +39,7 @@ const VotePage = () => {
   const handleUpvote = async (movieId) => {
     try {
       const response = await fetch(
-        'https://themoviesocial-a63e6cbb1f61.herokuapp.com/api/poll/upvoteMovie',
+        'https://lighthearted-moxie-82edfd.netlify.app/api/poll/upvoteMovie',
         {
           method: 'POST',
           headers: {

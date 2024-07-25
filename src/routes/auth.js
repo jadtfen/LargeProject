@@ -88,7 +88,7 @@ router.post('/sendEmail', async (req, res) => {
       text: `Hi! There, You have recently visited 
             our website and entered your email.
             Please follow the given link to verify your email
-            https://themoviesocial-a63e6cbb1f61.herokuapp.com/verifyEmail/${emailToken} 
+            https://lighthearted-moxie-82edfd.netlify.app/verifyEmail/${emailToken} 
             Thanks`,
     })
     .then(() => {
