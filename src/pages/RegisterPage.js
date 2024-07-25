@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
 import './styles/Register.css';
 
 function RegisterPage() {
@@ -90,7 +90,7 @@ function RegisterPage() {
         </form>
         {message && <span id="registerResult">{message}</span>}
         <div>
-          <span>If you already have an account, <a href="/login">Login</a></span>
+          <span>If you already have an account, <Link to="/login">Login</Link></span> {/* Updated Link */}
         </div>
       </div>
     </div>
