@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
 import './styles/Register.css';
 
 function RegisterPage() {
@@ -6,96 +7,62 @@ function RegisterPage() {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [token, setToken] = useState('');
+  const navigate = useNavigate();
 
-  const register = async (email, name, password) => {
+  const handleRegister = async (event) => {
+    event.preventDefault(); 
+
     try {
-      const response = await fetch('http://localhost:5002/api/auth/register', {
+      const response = await fetch('https://lighthearted-moxie-82edfd.netlify.app/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, name, password }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: registerUsername,
+          email: registerEmail,
+          password: registerPassword
+        })
       });
+
+      // Log the response status and headers for debugging
+      console.log('Response Status:', response.status);
+      console.log('Response Headers:', response.headers);
+
+      const contentType = response.headers.get('Content-Type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Expected JSON, but got:', text);
+        setMessage('Unexpected response format. Please try again.');
+        return;
+      }
 
       const data = await response.json();
-      console.log('Registration response:', response);
-      console.log('Registration data:', data);
-
       if (response.ok) {
-        console.log('Registration successful');
-        setMessage('Registration successful');
-        localStorage.setItem('token', data.token); // Store the token in localStorage
-        // Redirect to the join page or login page
-        window.location.href = '/join'; // Example: Redirect to '/join' page
-      } else if (response.status === 400) {
-        console.log('Registration failed: Bad Request');
-        console.log('Registration error:', data.error);
-        setMessage(`Registration failed: ${data.error}`);
+        // Registration successful
+        console.log('Registration successful:', data);
+        setMessage('Registration successful! Redirecting to login...');
+        setTimeout(() => navigate('/login'), 2000); // Redirect after a short delay
       } else {
-        console.log('Registration failed');
-        console.log('Registration error:', data.error);
-        setMessage(`Registration failed: ${data.error}`);
+        console.error('Registration error:', data.error);
+        setMessage(data.error || 'Registration failed. Please try again.'); // Display error message
       }
     } catch (error) {
-      console.error('Registration error:', error);
-      setMessage('Registration failed');
+      console.error('Unexpected error:', error);
+      setMessage('An unexpected error occurred. Please try again later.'); // Display generic error message
     }
   };
-
-  const fetchUserAccount = async (token) => {
-    try {
-      const response = await fetch('http://localhost:5002/api/auth/user', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('User account data:', data);
-        // Handle user account data
-      } else {
-        throw new Error('Failed to fetch user account');
-      }
-    } catch (error) {
-      console.error('Error fetching user account:', error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        const response = await fetch('http://localhost:5002/api/auth/token');
-        if (response.ok) {
-          const data = await response.json();
-          setToken(data.token);
-          fetchUserAccount(data.token);
-        } else {
-          throw new Error('Failed to fetch token');
-        }
-      } catch (error) {
-        console.error('Error fetching token:', error);
-      }
-    };
-
-    fetchToken();
-  }, []);
 
   return (
     <div className="container">
       <div id="registerDiv">
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          register(registerEmail, registerUsername, registerPassword);
-        }}>
-          <span id="inner-title">REGISTER</span><br />
+        <h2 id="inner-title">REGISTER</h2>
+        <form onSubmit={handleRegister}>
           <input
             type="text"
             id="registerUsername"
             placeholder="Username"
             value={registerUsername}
             onChange={(e) => setRegisterUsername(e.target.value)}
+            required
           /><br />
           <input
             type="email"
@@ -103,6 +70,7 @@ function RegisterPage() {
             placeholder="Email"
             value={registerEmail}
             onChange={(e) => setRegisterEmail(e.target.value)}
+            required
           /><br />
           <input
             type="password"
@@ -110,17 +78,19 @@ function RegisterPage() {
             placeholder="Password"
             value={registerPassword}
             onChange={(e) => setRegisterPassword(e.target.value)}
+            required
           /><br />
-          <input
+          <button
             type="submit"
             id="registerButton"
             className="buttons"
-            value="Register"
-          />
+          >
+            Register
+          </button>
         </form>
-        <span id="registerResult">{message}</span>
+        {message && <span id="registerResult">{message}</span>}
         <div>
-          <span>If you already have an account, <a href="/login">Login</a></span>
+          <span>If you already have an account, <Link to="/login">Login</Link></span>
         </div>
       </div>
     </div>
