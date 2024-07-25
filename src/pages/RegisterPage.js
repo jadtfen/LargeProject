@@ -13,13 +13,13 @@ function RegisterPage() {
     event.preventDefault(); 
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', { 
+      const response = await fetch('http://localhost:5000/api/auth/register', { // Adjust URL if needed
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: email,
-          name: name,
-          password: password
+          email: registerEmail,
+          name: registerName,
+          password: registerPassword
         })
       });
 
